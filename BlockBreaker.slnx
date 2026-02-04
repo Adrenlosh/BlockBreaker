@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/Platforms/">
-    <Project Path="BlockBreaker.WindowsDX/BlockBreaker.WindowsDX.csproj" />
     <Project Path="BlockBreaker/BlockBreaker.Android/BlockBreaker.Android.csproj">
       <Deploy />
     </Project>
@@ -8,6 +7,7 @@
     <Project Path="BlockBreaker/BlockBreaker.iOS/BlockBreaker.iOS.csproj">
       <Deploy />
     </Project>
+    <Project Path="BlockBreaker/BlockBreaker.WindowsDX/BlockBreaker.WindowsDX.csproj" />
   </Folder>
   <Project Path="BlockBreaker/BlockBreaker.Core/BlockBreaker.Core.csproj" />
 </Solution>

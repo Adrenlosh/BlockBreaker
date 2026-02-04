@@ -16,6 +16,6 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BlockBreaker\BlockBreaker.Core\BlockBreaker.Core.csproj" />
+    <ProjectReference Include="..\BlockBreaker.Core\BlockBreaker.Core.csproj" />
   </ItemGroup>
 </Project>

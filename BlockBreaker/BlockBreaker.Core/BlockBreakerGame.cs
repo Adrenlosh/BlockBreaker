@@ -1,111 +1,102 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using BlockBreaker.Core.Localization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using static System.Net.Mime.MediaTypeNames;
+using MonoGame.Extended.ViewportAdapters;
 
 namespace BlockBreaker.Core
 {
-    /// <summary>
-    /// The main class for the game, responsible for managing game components, settings, 
-    /// and platform-specific configurations.
-    /// </summary>
     public class BlockBreakerGame : Game
     {
-        // Resources for drawing.
         private GraphicsDeviceManager graphicsDeviceManager;
-
-        /// <summary>
-        /// Indicates if the game is running on a mobile platform.
-        /// </summary>
+        private SpriteBatch spriteBatch;
+        private BoxingViewportAdapter viewportAdapter;
+        private SpriteFont font;
+        private Map map;
+        private Platform platform;
         public readonly static bool IsMobile = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
-
-        /// <summary>
-        /// Indicates if the game is running on a desktop platform.
-        /// </summary>
         public readonly static bool IsDesktop = OperatingSystem.IsMacOS() || OperatingSystem.IsLinux() || OperatingSystem.IsWindows();
 
-        /// <summary>
-        /// Initializes a new instance of the game. Configures platform-specific settings, 
-        /// initializes services like settings and leaderboard managers, and sets up the 
-        /// screen manager for screen transitions.
-        /// </summary>
         public BlockBreakerGame()
         {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
-
-            // Share GraphicsDeviceManager as a service.
+            graphicsDeviceManager.PreferredBackBufferWidth = 256;
+            graphicsDeviceManager.PreferredBackBufferHeight = 240;
+            graphicsDeviceManager.ApplyChanges();
+            Window.AllowUserResizing = true;
+            IsMouseVisible = true;
+            IsFixedTimeStep = false;
             Services.AddService(typeof(GraphicsDeviceManager), graphicsDeviceManager);
-
             Content.RootDirectory = "Content";
-
-            // Configure screen orientations.
             graphicsDeviceManager.SupportedOrientations = DisplayOrientation.LandscapeLeft | DisplayOrientation.LandscapeRight;
         }
 
-        /// <summary>
-        /// Initializes the game, including setting up localization and adding the 
-        /// initial screens to the ScreenManager.
-        /// </summary>
         protected override void Initialize()
         {
             base.Initialize();
-
-            // Load supported languages and set the default language.
-            List<CultureInfo> cultures = LocalizationManager.GetSupportedCultures();
-            var languages = new List<CultureInfo>();
-            for (int i = 0; i < cultures.Count; i++)
-            {
-                languages.Add(cultures[i]);
-            }
-
-            // TODO You should load this from a settings file or similar,
-            // based on what the user or operating system selected.
-            var selectedLanguage = LocalizationManager.DEFAULT_CULTURE_CODE;
-            LocalizationManager.SetCulture(selectedLanguage);
         }
 
-        /// <summary>
-        /// Loads game content, such as textures and particle systems.
-        /// </summary>
         protected override void LoadContent()
         {
             base.LoadContent();
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, 256, 240);
+            font = Content.Load<SpriteFont>("Fonts/Hud");
+
+            map = new Map(
+            [
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            ]);
+
+            platform = new Platform(map);
+            platform.Position = new Vector2(0, 150);
         }
 
-        /// <summary>
-        /// Updates the game's logic, called once per frame.
-        /// </summary>
-        /// <param name="gameTime">
-        /// Provides a snapshot of timing values used for game updates.
-        /// </param>
         protected override void Update(GameTime gameTime)
         {
-            // Exit the game if the Back button (GamePad) or Escape key (Keyboard) is pressed.
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            // TODO: Add your update logic here
+            platform.Update(gameTime);
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// Draws the game's graphics, called once per frame.
-        /// </summary>
-        /// <param name="gameTime">
-        /// Provides a snapshot of timing values used for rendering.
-        /// </param>
         protected override void Draw(GameTime gameTime)
         {
-            // Clears the screen with the MonoGame orange color before drawing.
-            GraphicsDevice.Clear(Color.MonoGameOrange);
-
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin(transformMatrix: viewportAdapter.GetScaleMatrix(), samplerState: SamplerState.PointClamp);
+            map.Draw(spriteBatch);
+            platform.Draw(spriteBatch);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
