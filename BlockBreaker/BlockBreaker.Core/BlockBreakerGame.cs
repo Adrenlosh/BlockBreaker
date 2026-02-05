@@ -13,6 +13,7 @@ namespace BlockBreaker.Core
         private BoxingViewportAdapter viewportAdapter;
         private SpriteFont font;
         private Map map;
+        private Ball ball;
         private Platform platform;
         public readonly static bool IsMobile = OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
         public readonly static bool IsDesktop = OperatingSystem.IsMacOS() || OperatingSystem.IsLinux() || OperatingSystem.IsWindows();
@@ -79,6 +80,8 @@ namespace BlockBreaker.Core
 
             platform = new Platform(map);
             platform.Position = new Vector2(0, 150);
+            ball = new Ball(map);
+            
         }
 
         protected override void Update(GameTime gameTime)
@@ -86,7 +89,7 @@ namespace BlockBreaker.Core
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             platform.Update(gameTime);
-
+            ball.Position = platform.Position - new Vector2(0, ball.Size.Height + 1);
             base.Update(gameTime);
         }
 
@@ -96,8 +99,8 @@ namespace BlockBreaker.Core
             spriteBatch.Begin(transformMatrix: viewportAdapter.GetScaleMatrix(), samplerState: SamplerState.PointClamp);
             map.Draw(spriteBatch);
             platform.Draw(spriteBatch);
+            ball.Draw(spriteBatch);
             spriteBatch.End();
-
             base.Draw(gameTime);
         }
     }
